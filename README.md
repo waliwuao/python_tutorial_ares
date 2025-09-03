@@ -54,13 +54,11 @@ uname -m
 
 
 #### 2. 获取Miniconda安装脚本
-本教程所需的 Miniconda 安装脚本（64位）已包含在 GitHub 项目中，无需从官网下载。
+https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
 #### 3. 运行安装脚本
 进入项目目录后，通过 `bash` 命令执行安装脚本：
 ```bash
-cd
-cd python_tutorial_ares
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
