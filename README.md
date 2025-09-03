@@ -1,4 +1,4 @@
-# Python 开发全方位指南
+# Python 开发与ROS2全方位指南
 ## 目录
 1. [Conda 全方位介绍](#conda-全方位介绍)
    - [一、什么是Conda？](#一什么是conda)
@@ -14,6 +14,12 @@
    - [一、类与对象的基本概念](#一类与对象的基本概念)
    - [二、类的定义与对象的创建](#二类的定义与对象的创建)
    - [三、类的方法](#三类的方法)
+4. [ROS2 入门与Python开发](#ros2-入门与python开发)
+   - [一、什么是ROS2？](#一什么是ros2)
+   - [二、ROS2核心概念](#二ros2核心概念)
+   - [三、使用Python创建ROS2节点](#三使用python创建ros2节点)
+   - [四、发布者与订阅者实现](#四发布者与订阅者实现)
+   - [五、运行与测试ROS2节点](#五运行与测试ros2节点)
 
 
 ## Conda 全方位介绍
@@ -429,4 +435,175 @@ class Person:
 p = Person("王五", 30)
 p.speak()       # 输出：我叫王五，今年30岁
 p.birthday()    # 输出：生日快乐！王五现在31岁了
+```
+
+
+## ROS2 入门与Python开发
+### 一、什么是ROS2？
+ROS2（Robot Operating System 2）是一个开源的机器人软件框架，它提供了一套工具、库和协议，帮助开发者构建复杂的机器人系统。ROS2在ROS1的基础上进行了重构，解决了ROS1的一些局限性，如实时性、安全性、多机器人系统支持和跨平台兼容性等。
+
+ROS2的设计目标是为机器人开发提供更灵活、更可靠的基础，支持从简单的小型机器人到复杂的工业机器人系统。
+
+### 二、ROS2核心概念
+1. **节点（Node）**：执行特定功能的进程，每个节点应专注于单一功能，通过话题、服务等与其他节点通信。
+   
+2. **话题（Topic）**：节点间异步通信的机制，采用发布-订阅模式。一个节点发布消息到话题，多个节点可以订阅该话题。
+
+3. **消息（Message）**：节点间传递的数据结构，ROS2定义了许多标准消息类型（如`std_msgs/msg/String`、`geometry_msgs/msg/Twist`等），也支持自定义消息。
+
+4. **服务（Service）**：节点间同步通信的机制，采用请求-响应模式。一个节点提供服务，其他节点发送请求并等待响应。
+
+5. **包（Package）**：ROS2软件的基本组织单位，包含节点、配置文件、脚本等，便于共享和重用。
+
+### 三、使用Python创建ROS2节点
+在ROS2中，使用Python创建节点非常简单，通常需要以下步骤：
+
+#### 1. 创建ROS2包
+首先创建一个ROS2包来组织代码：
+```bash
+# 创建工作空间
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+
+# 创建Python包
+ros2 pkg create --build-type ament_python my_py_pkg
+```
+
+#### 2. 节点基本结构
+一个基本的ROS2 Python节点结构如下：
+```python
+import rclpy
+from rclpy.node import Node
+
+class MyNode(Node):
+    def __init__(self):
+        super().__init__('node_name')  # 节点名称
+        self.get_logger().info('节点已启动！')
+
+def main(args=None):
+    rclpy.init(args=args)  # 初始化ROS2
+    node = MyNode()        # 创建节点实例
+    rclpy.spin(node)       # 保持节点运行
+    node.destroy_node()    # 销毁节点
+    rclpy.shutdown()       # 关闭ROS2
+
+if __name__ == '__main__':
+    main()
+```
+
+### 四、发布者与订阅者实现
+下面创建一个发布者节点和一个订阅者节点，实现字符串消息的传递。
+
+#### 1. 发布者节点（publisher_node.py）
+```python
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String  # 标准字符串消息类型
+
+class PublisherNode(Node):
+    def __init__(self):
+        super().__init__('publisher_node')
+        # 创建发布者，话题名为'topic_name'，消息类型为String，队列大小为10
+        self.publisher_ = self.create_publisher(String, 'topic_name', 10)
+        
+        # 创建定时器，每1秒调用一次timer_callback函数
+        timer_period = 1.0  # 秒
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.count = 0
+
+    def timer_callback(self):
+        # 创建消息并填充内容
+        msg = String()
+        msg.data = f"Hello ROS2! 计数: {self.count}"
+        self.publisher_.publish(msg)  # 发布消息
+        self.get_logger().info(f"发布: {msg.data}")  # 打印日志
+        self.count += 1
+
+def main(args=None):
+    rclpy.init(args=args)
+    publisher_node = PublisherNode()
+    rclpy.spin(publisher_node)
+    publisher_node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+#### 2. 订阅者节点（subscriber_node.py）
+```python
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+
+class SubscriberNode(Node):
+    def __init__(self):
+        super().__init__('subscriber_node')
+        # 创建订阅者，订阅'topic_name'话题，收到消息时调用listener_callback
+        self.subscription = self.create_subscription(
+            String,
+            'topic_name',
+            self.listener_callback,
+            10)
+        self.subscription  # 防止未使用变量警告
+
+    def listener_callback(self, msg):
+        # 处理收到的消息
+        self.get_logger().info(f"收到: {msg.data}")
+
+def main(args=None):
+    rclpy.init(args=args)
+    subscriber_node = SubscriberNode()
+    rclpy.spin(subscriber_node)
+    subscriber_node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+#### 3. 配置setup.py
+修改`setup.py`文件，添加入口点：
+```python
+entry_points={
+    'console_scripts': [
+        'publisher = my_py_pkg.publisher_node:main',
+        'subscriber = my_py_pkg.subscriber_node:main',
+    ],
+},
+```
+
+### 五、运行与测试ROS2节点
+#### 1. 编译包
+```bash
+cd ~/ros2_ws
+colcon build
+source install/setup.bash
+```
+
+#### 2. 运行发布者
+打开一个新终端，运行：
+```bash
+source ~/ros2_ws/install/setup.bash
+ros2 run my_py_pkg publisher
+```
+
+#### 3. 运行订阅者
+再打开一个新终端，运行：
+```bash
+source ~/ros2_ws/install/setup.bash
+ros2 run my_py_pkg subscriber
+```
+
+#### 4. 查看话题
+可以使用`ros2 topic`命令查看系统中的话题和消息：
+```bash
+# 列出所有话题
+ros2 topic list
+
+# 查看话题消息
+ros2 topic echo /topic_name
+
+# 查看话题信息
+ros2 topic info /topic_name
 ```
