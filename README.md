@@ -60,7 +60,7 @@ uname -m
 进入项目目录后，通过 `bash` 命令执行安装脚本：
 ```bash
 cd
-cd python_tutorial
+cd python_tutorial_ares
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
