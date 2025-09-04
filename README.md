@@ -430,11 +430,6 @@ export PYTHONPATH="/home/user/my_python_scripts:$PYTHONPATH"
 source ~/.bashrc  # 或 source ~/.zshrc
 ```
 
-##### Windows 系统：
-1. 右键「此电脑」→「属性」→「高级系统设置」→「环境变量」
-2. 在「系统变量」中点击「新建」，变量名填 `PYTHONPATH`，变量值填自定义路径（如 `C:\my_python_scripts`）
-3. 点击「确定」保存，重启终端生效
-
 #### 4. 作用
 - 解决「ModuleNotFoundError」：当模块不在默认搜索路径时，通过添加路径让 Python 找到模块
 - 方便管理自定义模块：将常用脚本放在固定目录并添加到 `PYTHONPATH`，可在任何地方导入使用
