@@ -10,6 +10,8 @@
    - [二、循环与判断](#二循环与判断)
    - [三、列表、字典与元组](#三列表字典与元组)
    - [四、函数](#四函数)
+   - [五、import 语句（模块导入）](#五import-语句模块导入)
+   - [六、PYTHONPATH 环境变量](#六pythonpath-环境变量)
 3. [Python 面向对象编程（OOP）教程](#python-面向对象编程oop教程)
    - [一、类与对象的基本概念](#一类与对象的基本概念)
    - [二、类的定义与对象的创建](#二类的定义与对象的创建)
@@ -358,6 +360,84 @@ def divide(a, b):
 result = divide(10, 2)
 print(result)  # 5.0
 ```
+
+### 五、import 语句（模块导入）
+
+在 Python 中，`import` 语句用于导入其他模块（.py 文件）中的代码，实现代码复用。模块可以是 Python 标准库、第三方库或自定义脚本。
+
+#### 1. 基本导入方式
+```python
+# 导入整个模块
+import math  # 导入标准数学模块
+print(math.sqrt(16))  # 使用模块中的函数（模块名.函数名）
+
+# 导入模块并指定别名
+import numpy as np  # 为模块指定简短别名
+print(np.array([1, 2, 3]))  # 通过别名使用模块
+
+# 导入模块中的特定成员
+from random import randint  # 只导入random模块中的randint函数
+print(randint(1, 10))  # 直接使用函数，无需模块名
+
+# 导入模块中的所有成员（不推荐，可能导致命名冲突）
+from datetime import *
+print(datetime.now())  # 直接使用datetime类
+```
+
+#### 2. 导入自定义模块
+如果有一个自定义文件 `my_module.py`：
+```python
+# my_module.py
+def greet(name):
+    return f"Hello, {name}!"
+```
+
+可以在同一目录下的其他文件中导入：
+```python
+from my_module import greet
+print(greet("Python"))  # 输出：Hello, Python!
+```
+
+### 六、PYTHONPATH 环境变量
+
+`PYTHONPATH` 是 Python 解释器用于查找模块的路径列表。当使用 `import` 语句时，Python 会在这些路径中搜索对应的模块。
+
+#### 1. 查看当前 PYTHONPATH
+```python
+import sys
+print(sys.path)  # 打印Python的模块搜索路径列表
+```
+
+#### 2. 临时添加路径（代码中）
+在代码运行时动态添加模块搜索路径：
+```python
+import sys
+# 添加自定义目录到搜索路径
+sys.path.append("/home/user/my_python_scripts")
+
+# 之后就可以导入该目录下的模块
+import my_script  # 导入/home/user/my_python_scripts/my_script.py
+```
+
+#### 3. 永久设置 PYTHONPATH（终端）
+##### Linux/Mac 系统：
+在 `.bashrc` 或 `.zshrc` 中添加：
+```bash
+export PYTHONPATH="/home/user/my_python_scripts:$PYTHONPATH"
+```
+生效命令：
+```bash
+source ~/.bashrc  # 或 source ~/.zshrc
+```
+
+##### Windows 系统：
+1. 右键「此电脑」→「属性」→「高级系统设置」→「环境变量」
+2. 在「系统变量」中点击「新建」，变量名填 `PYTHONPATH`，变量值填自定义路径（如 `C:\my_python_scripts`）
+3. 点击「确定」保存，重启终端生效
+
+#### 4. 作用
+- 解决「ModuleNotFoundError」：当模块不在默认搜索路径时，通过添加路径让 Python 找到模块
+- 方便管理自定义模块：将常用脚本放在固定目录并添加到 `PYTHONPATH`，可在任何地方导入使用
 
 
 ## Python 面向对象编程（OOP）教程
